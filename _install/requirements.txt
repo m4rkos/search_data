@@ -5,3 +5,4 @@ sys
 time
 db-sqlite3
 selenium
+pandas
