@@ -5,8 +5,6 @@ import datetime
 import time
 import sqlite3
 
-# from random import randint
-
 class FinderScript:
     
     def main(self):
@@ -45,19 +43,13 @@ class FinderScript:
                 
         if t == 'b': 
             t = 'Bing' #browser_core.find_element_by_class_name("sb_count").text            
-            # name = name.replace('" "', ', ')
-            # name = name.replace('"', '')
-            # name = name.replace('  ', ' ')
+            
         if t == 'y': 
             t = 'Yahoo' #browser_core.find_element_by_css_selector(".compPagination span").text            
-            # name = name.replace('" "', ', ')
-            # name = name.replace('"', '')
-            # name = name.replace('  ', ' ')
+            
         if t == 'g': 
             t = 'Google' #browser_core.find_element_by_id("appbar").text            
-            # name = name.replace('" "', ', ')
-            # name = name.replace('"', '')
-            # name = name.replace('  ', ' ')
+            
         if t == 'd': 
             t = 'DuckDuckGo'
 
