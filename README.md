@@ -15,6 +15,6 @@ Result data
 
 ![alt text][db2]
 
-[db1]: images/searching_data.png "Logo Title Text 2"
+[db1]: ./images/searching_data.png "Image of search topic"
 
-[db2]: images/searching_data_result.png "Logo Title Text 2"
+[db2]: ./images/searching_data_result.png "Images of results found"
