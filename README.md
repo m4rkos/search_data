@@ -15,6 +15,6 @@ Result data
 
 ![alt text][db2]
 
-[db1]: ./images/searching_data.png "Image of search topic"
+[db1]: https://moow.com.br/static/images/git/searching_data.PNG "Image of search topic"
 
-[db2]: ./images/searching_data_result.png "Images of results found"
+[db2]: https://moow.com.br/static/images/git/searching_data_result.PNG "Images of results found"
