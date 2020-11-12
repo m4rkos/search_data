@@ -29,12 +29,13 @@ class FinderScript:
             'https://br.search.yahoo.com/search?p=%s&fr=yfp-search-sb&guccounter=1',           
             'https://www.google.se/search?hl=sv&q=%s&tbas=0&tbs=qdr:y,sbd:1&source=lnt&sa=X"\
             "&ved=0ahUKEwisyI2st9vgAhUuHbkGHSTbAGkQpwUIIw&biw=1920&bih=966',
-            'https://duckduckgo.com/?ia=web'
+            'https://duckduckgo.com/?q=%s&t=h_&ia=web'
         ]
 
         self.engine(url[0], 'b', name, idf)
         self.engine(url[1], 'y', name, idf)
         self.engine(url[2], 'g', name, idf)
+        self.engine(url[3], 'd', name, idf)
     
     
     def engine(self, url, t, name, idf):
@@ -57,7 +58,8 @@ class FinderScript:
             # name = name.replace('" "', ', ')
             # name = name.replace('"', '')
             # name = name.replace('  ', ' ')
-        
+        if t == 'd': 
+            t = 'DuckDuckGo'
 
         link = url % name
         browser_core.get(link)
@@ -159,6 +161,35 @@ class FinderScript:
                 print(f"Results: {total}")
 
                 self.sqliteUpdateSaveSearch(idf, total, t)
+
+
+            if t == 'DuckDuckGo':
+                
+                res_items = browser_core.find_elements_by_css_selector('div.results--main div#links div.result.results_links_deep.highlight_d.result--url-above-snippet div.result__body')
+                for rs in res_items:
+                    try:
+                        if rs.text != '':
+                            #print(rs.text)                    
+                            data = {
+                                'id' : idf,
+                                'description' : rs.text.replace('"', '').replace("'", ''), 
+                                'screen_shot' : rs.screenshot_as_base64, 
+                                'folder' : img_name, 
+                                'engine' : t
+                            }
+
+                            self.sqliteSaveRes(data)
+                        pass
+
+                    finally:
+                        pass                    
+
+                    pass
+
+                total = int(len(res_items))
+                print(f"Results: {total}")
+
+                self.sqliteUpdateSaveSearch(idf, total, t)
                         
             self.save_html(body, path, t)
                         
@@ -196,6 +227,7 @@ class FinderScript:
         if tbl == 'Bing': tbl = 'count_bing'
         if tbl == 'Google': tbl = 'count_google'
         if tbl == 'Yahoo': tbl = 'count_yahoo'
+        if tbl == 'DuckDuckGo': tbl = 'count_duck_duck_go'
 
         c.execute(f"UPDATE searching_for SET {tbl} = {res} WHERE ID_search = '{idf}' ")
         
@@ -216,6 +248,7 @@ class FinderScript:
                         count_bing INTEGER NULL,
                         count_google INTEGER NULL,
                         count_yahoo INTEGER NULL,
+                        count_duck_duck_go INTEGER NULL,
                         ct DATETIME DEFAULT CURRENT_TIMESTAMP                        
                     )''')
                 
