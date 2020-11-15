@@ -4,11 +4,26 @@ import os, sys
 import datetime
 import time
 import sqlite3
+import urllib.request
 
 class FinderScript:
     
     def main(self):
         
+        type_search = input("What kind of search: \n\nImages: i\nContent: c\n\ntype: ")
+
+        while type_search != 'i' and type_search != 'c':
+            type_search = input("\n\nWrong, what kind of search: \n\nImages: i\nContent: c\n\ntype: ")                
+            pass
+
+        if(type_search == 'i'):
+            self.mainImages()
+
+        elif(type_search == 'c'):
+            self.mainContent()
+        
+    def mainContent(self):
+
         name = input('\n\nType search: ')
         idf = str(uuid.uuid4())
 
@@ -34,15 +49,39 @@ class FinderScript:
         self.engine(url[1], 'y', name, idf)
         self.engine(url[2], 'g', name, idf)
         self.engine(url[3], 'd', name, idf)
+
+
+    def mainImages(self):
+
+        name = input('\n\nType search: ')
+        idf = str(uuid.uuid4())
+
+        if name != None:
+            self.sqliteSaveSearch(idf, f"{name} - images")
+
+        name.replace(' ', '+')
+        name = name.replace('" "', ', ')
+        name = name.replace('"', '')
+        name = name.replace('  ', ' ')
+
+        print('\nSearching...\n')
+
+        url = [            
+            'https://www.bing.com/images/search?q=%s&first=1&scenario=ImageBasicHover',
+            'https://duckduckgo.com/?q=%s&t=h_&iar=images&iax=images&ia=images&kp=-2'            
+        ]
+
+        # self.downloadImages(url[0], 'b', name, idf)
+        self.downloadImages(url[1], 'd', name, idf)
     
     
     def engine(self, url, t, name, idf):
         
-        browser_core = webdriver.Firefox(executable_path=r'./geckodriver.exe')
+        browser_core = webdriver.Firefox(executable_path=r'./geckodriver')
         browser_core.minimize_window()
                 
         if t == 'b': 
-            t = 'Bing' #browser_core.find_element_by_class_name("sb_count").text            
+            t = 'Bing' #browsmainImageser_courl, t, name, idfre.find_element_by_class_name("sb_count").text            
             
         if t == 'y': 
             t = 'Yahoo' #browser_core.find_element_by_css_selector(".compPagination span").text            
@@ -190,6 +229,138 @@ class FinderScript:
             time.sleep(5)
 
 
+    def downloadImages(self, url, t, name, idf):
+
+        browser_core = webdriver.Firefox(executable_path=r'./geckodriver')
+        browser_core.minimize_window()
+                
+        if t == 'b': 
+            t = 'Bing' #browser_core.find_element_by_class_name("sb_count").text            
+            
+        if t == 'y': 
+            t = 'Yahoo' #browser_core.find_element_by_css_selector(".compPagination span").text            
+            
+        if t == 'g': 
+            t = 'Google' #browser_core.find_element_by_id("appbar").text            
+            
+        if t == 'd': 
+            t = 'DuckDuckGo'
+
+        link = url % name
+        browser_core.get(link)
+
+        print(f'browsing images on {t}')
+
+        if name != '' :
+            img_name = name.replace('+', '_')
+            img_name = img_name.replace(' ', '_')
+
+            path = f'data/{img_name}'            
+
+            if os.path.isdir(path) == False:
+                os.mkdir(path)
+
+            browser_core.get_screenshot_as_file(f"{path}/{str(uuid.uuid4())}_{t}.png")
+            #body = browser_core.find_element_by_tag_name("body").text
+
+            images_path_0 = f"{path}/images"
+            if os.path.isdir(images_path_0) == False:
+                os.mkdir(images_path_0)
+            
+            if t == 'Bing':
+                res_items = browser_core.find_elements_by_css_selector('div#b_content div#vm_c div.dg_b .dgControl.hover .dgControl_list li a.iusc div.img_cont.hoff img')
+                number = 0
+
+                images_path = f"{images_path_0}/{t}"
+                if os.path.isdir(images_path) == False:
+                    os.mkdir(images_path)
+
+                for rs in res_items:                    
+                    try:                 
+                        urllib.request.urlretrieve(rs.get_attribute('src'), f"{images_path}/{name}_{number}.jpg")
+                        number += 1
+                        # print(rs.get_attribute('src'))                           
+
+                    finally:
+                        pass
+                    
+                    pass
+
+                total = int(len(res_items))
+                print(f"Results: {total}")
+
+                self.sqliteUpdateSaveSearch(idf, total, t)
+
+            # if t == 'DuckDuckGo':
+            #     res_items = browser_core.find_elements_by_css_selector('#zci-images .tile-wrap .zci__main.zci__main--tiles.js-tiles.has-nav.tileview__images.has-tiles--grid div.tile.tile--img.has-detail .tile--img__media span.tile--img__media__i img.tile--img__img.js-lazyload')
+            #     number = 0
+
+            #     for rs in res_items:
+            #         try:
+            #             urllib.request.urlretrieve(rs.get_attribute('src'), f"{images_path}/{name}_{number}.jpg")
+            #             number += 1
+            #             #print(rs.get_attribute('src'))                           
+
+            #         finally:
+            #             pass
+                    
+            #         pass
+
+            #     total = int(len(res_items))
+            #     print(f"Results: {total}")
+
+            #     self.sqliteUpdateSaveSearch(idf, total, t)
+
+            # if t == 'DuckDuckGo':
+            #     res_items = browser_core.find_elements_by_css_selector('#zci-images .tile-wrap .zci__main.zci__main--tiles.js-tiles.has-nav.tileview__images.has-tiles--grid div.tile.tile--img.has-detail .tile--img__media span.tile--img__media__i img.tile--img__img.js-lazyload')
+            #     number = 0
+
+            #     for rs in res_items:
+            #         try:
+            #             urllib.request.urlretrieve(rs.get_attribute('src'), f"{images_path}/{name}_{number}.jpg")
+            #             number += 1
+            #             #print(rs.get_attribute('src'))                           
+
+            #         finally:
+            #             pass
+                    
+            #         pass
+
+            #     total = int(len(res_items))
+            #     print(f"Results: {total}")
+
+            #     self.sqliteUpdateSaveSearch(idf, total, t)
+
+            if t == 'DuckDuckGo':                
+                res_items = browser_core.find_elements_by_css_selector('#zci-images .tile-wrap .zci__main.zci__main--tiles.js-tiles.has-nav.tileview__images.has-tiles--grid div.tile.tile--img.has-detail .tile--img__media span.tile--img__media__i img.tile--img__img.js-lazyload')
+                number = 0
+
+                images_path = f"{images_path_0}/{t}"
+                if os.path.isdir(images_path) == False:
+                    os.mkdir(images_path)
+
+                for rs in res_items:
+                    try:
+                        urllib.request.urlretrieve(rs.get_attribute('src'), f"{images_path}/{name}_{number}.jpg")
+                        number += 1
+                        #print(rs.get_attribute('src'))                           
+
+                    finally:
+                        pass
+                    
+                    pass
+
+                total = int(len(res_items))
+                print(f"Results: {total}")
+
+                self.sqliteUpdateSaveSearch(idf, total, t)
+
+            browser_core.quit() # -- Close window
+            time.sleep(5)
+
+
+    # --- DB
+
     def db(self):
         return sqlite3.connect('finder.db')
 
@@ -274,6 +445,7 @@ class FinderScript:
         conn.commit()        
         conn.close()
 
+
     
-# start = FinderScript()
-# start.main()
+start = FinderScript()
+start.main()
